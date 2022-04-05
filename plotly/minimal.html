@@ -1,0 +1,377 @@
+<head>
+    <!-- Load plotly.js into the DOM -->
+    <script src='https://cdn.plot.ly/plotly-2.9.0.min.js'></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>qbee plot</title>
+</head>
+
+<style>
+    /* qbee Basic style */
+
+    body {
+        height: 95vh;
+        background: #ffffff;
+        background-image: url("https://wp.qbee.io/wp-content/uploads/2022/03/bg_grid_white.png");
+        /* fallback */
+        background-image: url("https://wp.qbee.io/wp-content/uploads/2022/03/bg_grid_white.png"), linear-gradient(160deg, rgba(142, 202, 230, 0.9) 0%, rgba(236, 249, 255, 0.7) 50%);
+        /* W3C */
+        background-repeat: no-repeat;
+        background-position: top left;
+    }
+
+    .logo img {
+        width: 250px;
+        padding-top: 50px;
+        padding-left: 80px;
+    }
+
+    .content {
+        padding-top: 80px;
+        padding-left: 80px;
+        padding-right: 80px;
+    }
+
+    .qbee_btn {
+        background-color: #FFB703;
+        color: white;
+        padding: 15px 25px 15px 25px;
+        font-size: 16px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-family: sans-serif;
+    }
+
+    .qbee_btn:hover {
+        background-color: #FB8500;
+    }
+
+    .qbee_btn:active{
+        background-color: #FFB703;
+    }
+
+    .qbee_select select {
+        width: 20%;
+        border: none;
+        border-radius: 0;
+        background-color: #FFB703;
+        color: white;
+        padding: 15px 25px 15px 25px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        border-right: 15px solid transparent;
+    }
+
+    .qbee_select select:hover{
+            background-color: #FB8500;
+    }
+
+    .qbee_select select:active{
+            background-color: #FFB703;
+    }
+
+    .qbee_select option {
+        background-color: #fff;
+        color: #000;
+        border-bottom: 10px solid #eee;
+    }
+
+    .qbee_select :disabled{
+        background-color: #c8c8c8;
+        color:#000;
+    }
+</style>
+
+<body>
+
+    <div class="logo">
+        <img src="https://qbee.tag-eins.de/wp-content/uploads/2022/02/qbee-logo-horizontal.png">
+    </div>
+
+    <div class="content">
+        <form class="qbee_select">
+            <select id="plotSelector">
+            </select>
+        </form>
+        <div id='myDiv'>
+            <!-- Plotly chart will be drawn inside this DIV -->
+        </div>
+        <!--<button onclick="togglePause()">&#9658;</button>-->
+        <button class="qbee_btn" style="margin-bottom: 15px;">
+            <i id="playButton" onclick="togglePause()" class="material-icons">pause</i>
+            <!-- <i class="material-icons">play_arrow</i> -->
+        </button>
+
+        <script>
+            var isPaused = false;
+            var poll_rate_status = 5000; //ms
+            var poll_rate_plot = 5000; //ms
+            var plot_id_url = "/plot_id";
+            var status_url = "/state";
+            var data_url = "/current_data";
+            var plot_list_url = "/available_plots";
+
+            var qbee_color = 'rgb(2,48,71)';
+
+            var status_interval = setInterval(checkStatus, poll_rate_status);
+            var plot_interval = setInterval(checkPlotStatus, poll_rate_plot);
+
+            var plot_list_id;
+            var tag_id = {};
+            var plot_list = [];
+            var plot_data = {};
+            var current_plot = undefined;
+
+            function getBaseUrl() {
+                var getUrl = window.location;
+                return getUrl.origin;
+            }
+
+            function checkStatus() {
+                if (!isPaused) {
+                    const url = getBaseUrl() + status_url;
+
+                    fetch(url).then(function (response) {
+                        return response.json();
+                    }).then(function (data) {
+                        var server_id = data;
+                        console.log("server id: ", server_id);
+
+                        if (plot_list_id !== server_id) {
+                            plot_list_id = server_id;
+                            console.log("current_id: ", plot_list_id);
+                            update_plot_list();
+                            //create_dummy_plot();
+                        }
+
+                    }).catch(function (err) {
+                        console.log("something went wrong");
+                        console.log(err);
+                        clearInterval(status_interval);
+                    });
+                }
+            }
+
+            function update_plot_list() {
+                var url = new URL(getBaseUrl() + plot_list_url);
+
+                fetch(url).then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                    plot_list = data;
+                    update_options();
+                }).catch(function (err) {
+                    console.log("something went wrong");
+                    console.log(err);
+                    clearInterval(status_interval);
+                });
+            }
+
+            function checkPlotStatus() {
+                if (!isPaused && current_plot !== undefined) {
+                    tag = current_plot;
+                    var url = new URL(getBaseUrl() + plot_id_url);
+                    var params = { "tag": tag };
+                    url.search = new URLSearchParams(params).toString();
+
+                    fetch(url).then(function (response) {
+                        return response.json();
+                    }).then(function (data) {
+                        var server_id = data;
+                        console.log("server id: ", server_id);
+
+                        if (tag_id[tag] !== server_id) {
+                            tag_id[tag] = server_id;
+                            console.log("current_id: ", tag_id);
+                            update_plot_data(tag);
+                            //create_dummy_plot();
+                        }
+
+                    }).catch(function (err) {
+                        console.log("something went wrong");
+                        console.log(err);
+                        clearInterval(status_interval);
+                    });
+                }
+            }
+
+            function update_plot_data(tag) {
+                var url = new URL(getBaseUrl() + data_url);
+                var params = { "tag": tag };
+                url.search = new URLSearchParams(params).toString();
+
+                fetch(url).then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                    plot_data[tag] = data;
+                    make_plot(tag);
+
+                }).catch(function (err) {
+                    console.log("something went wrong");
+                    console.log(err);
+                    clearInterval(status_interval);
+                });
+            }
+
+            var plotly_data = {};
+
+            function make_plot(tag) {
+                plotly_data = {
+                    x: plot_data[tag].time,
+                    y: plot_data[tag].value,
+                    mode: 'lines+markers',
+                    marker: {
+                        color: qbee_color,
+                        size: 10
+                    },
+                    line: {
+                        color: qbee_color,
+                        width: 2
+                    }
+                };
+
+                console.log(plot_data);
+                console.log(plotly_data);
+
+                layout.title.text = tag;
+                var tag_unit = plot_data[tag].unit;
+                var y_title = "Value";
+                if (tag_unit !== null) {
+                    y_title = tag_unit;
+                }
+                layout.yaxis.title.text = y_title;
+
+                Plotly.newPlot('myDiv', [plotly_data], layout, config);
+            }
+
+            function make_empty_plot(plot) {
+                layout.title.text = 'No plot selected';
+                layout.yaxis.title.text = 'Value';
+
+                Plotly.newPlot('myDiv', [empty_data], layout, config);
+            }
+
+            var empty_data = {
+                x: [],
+                y: [],
+                mode: 'scatter'
+            };
+
+            var layout = {
+                title: {
+                    text: 'Plot Name',
+                    font: {
+                        color: qbee_color,
+                        size: '30',
+                        family: 'Ubuntu,Arial'
+                    }
+                },
+                xaxis: {
+                    title: {
+                        text: 'Time',
+                        font: {
+                            color: qbee_color,
+                            size: '20',
+                            family: 'Ubuntu,Arial'
+                        }
+                    },
+                    showgrid: true,
+                    zeroline: false,
+                    gridcolor: 'rgba(197,197,197,1)',
+                    tickfont: {
+                        family: 'Ubuntu, Arial',
+                        size: 16,
+                        color: qbee_color
+                    },
+                },
+                yaxis: {
+                    title: {
+                        text: 'Value',
+                        font: {
+                            color: qbee_color,
+                            size: '20',
+                            family: 'Ubuntu,Arial'
+                        }
+                    },
+                    showline: false,
+                    gridcolor: 'rgba(197,197,197,1)',
+                    tickfont: {
+                        family: 'Ubuntu, Arial',
+                        size: 16,
+                        color: qbee_color
+                    },
+                },
+                paper_bgcolor: "rgba(0,0,0,0)",
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+
+
+            var config = { responsive: true };
+
+
+            function update_options() {
+
+                var select = document.getElementById("plotSelector");
+
+                while (select.firstChild) {
+                    select.firstChild.remove()
+                }
+
+                var el = document.createElement("option");
+                el.text = plot_list.length === 0 ? "Empty plot list" : "Choose a plot";
+                el.setAttribute('disabled', '');
+                el.setAttribute('selected', '');
+                el.setAttribute('value', '');
+                select.add(el);
+
+                for (var i = 0; i < plot_list.length; i++) {
+                    var opt = plot_list[i];
+
+                    el = document.createElement("option");
+                    el.text = opt;
+                    el.value = opt;
+
+                    select.add(el);
+                }
+
+                var search = plot_list.find(x => x === current_plot);
+                if (search !== undefined) {
+                    select.value = search;
+                } else {
+                    current_plot = undefined;
+                    make_empty_plot();
+                }
+            }
+            console.log("main script getting loaded");
+
+
+            //document.getElementById("plotSelector").value = 'a';
+            document.getElementById("plotSelector").onchange = function () {
+                console.log("changing selection: ", this.value);
+                current_plot = this.value;
+                if (!(current_plot in plot_data)) {
+                    console.log("tag not yet in container");
+                    update_plot_data(current_plot);
+                } else {
+                    console.log("making plot");
+                    make_plot(current_plot);
+                }
+            }
+
+            var icons = ['pause', 'play_arrow'];
+            function togglePause() {
+                isPaused = !isPaused;
+                b = document.getElementById("playButton");
+                b.innerHTML = icons[+isPaused];
+            }
+
+            function init(){
+                make_empty_plot();
+                checkStatus();
+            }
+
+            init();
+        </script>
+    </div>
+</body>
