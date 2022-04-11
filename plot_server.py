@@ -6,6 +6,7 @@ from io import IOBase
 from collections import deque
 import argparse
 import json
+from dateutil.tz import tzlocal
 
 hostName = None
 serverPort = None
@@ -26,12 +27,12 @@ class DataObj:
     def insert(self,val,ts=None):
         #self.time.append(datetime.now().replace(microsecond=0))
         if ts is None:
-            dt = datetime.now()
+            dt = datetime.now(tzlocal())
         else:
             dtup = decimal.Decimal(ts).as_tuple()
             ts_len = len(dtup.digits) + dtup.exponent
             ts_calc = ts if ts_len == 10 else ts/1000
-            dt = datetime.fromtimestamp(ts_calc)
+            dt = datetime.fromtimestamp(ts_calc, tzlocal())
 
         self.time.append(dt)
         self.vals.append(val)

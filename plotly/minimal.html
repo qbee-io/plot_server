@@ -1,6 +1,7 @@
 <head>
     <!-- Load plotly.js into the DOM -->
     <script src='https://cdn.plot.ly/plotly-2.9.0.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js'></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>qbee plot</title>
 </head>
@@ -218,7 +219,7 @@
 
             function make_plot(tag) {
                 plotly_data = {
-                    x: plot_data[tag].time,
+                    x: plot_data[tag].time.map(x => moment(x).format()),
                     y: plot_data[tag].value,
                     mode: 'lines+markers',
                     marker: {
