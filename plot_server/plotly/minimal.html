@@ -12,9 +12,9 @@
     body {
         height: 95vh;
         background: #ffffff;
-        background-image: url("https://wp.qbee.io/wp-content/uploads/2022/03/bg_grid_white.png");
+        background-image: url("https://qbee.io/wp-content/uploads/2022/03/bg_grid_white.png");
         /* fallback */
-        background-image: url("https://wp.qbee.io/wp-content/uploads/2022/03/bg_grid_white.png"), linear-gradient(160deg, rgba(142, 202, 230, 0.9) 0%, rgba(236, 249, 255, 0.7) 50%);
+        background-image: url("https://qbee.io/wp-content/uploads/2022/03/bg_grid_white.png"), linear-gradient(160deg, rgba(142, 202, 230, 0.9) 0%, rgba(236, 249, 255, 0.7) 50%);
         /* W3C */
         background-repeat: no-repeat;
         background-position: top left;
@@ -87,7 +87,7 @@
 <body>
 
     <div class="logo">
-        <img src="https://qbee.tag-eins.de/wp-content/uploads/2022/02/qbee-logo-horizontal.png">
+        <img src="https://qbee.io/wp-content/uploads/2022/02/logo_qbee_actualsize.png">
     </div>
 
     <div class="content">
@@ -98,10 +98,8 @@
         <div id='myDiv'>
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
-        <!--<button onclick="togglePause()">&#9658;</button>-->
         <button class="qbee_btn" style="margin-bottom: 15px;">
             <i id="playButton" onclick="togglePause()" class="material-icons">pause</i>
-            <!-- <i class="material-icons">play_arrow</i> -->
         </button>
 
         <script>
@@ -143,7 +141,6 @@
                             plot_list_id = server_id;
                             console.log("current_id: ", plot_list_id);
                             update_plot_list();
-                            //create_dummy_plot();
                         }
 
                     }).catch(function (err) {
@@ -186,7 +183,6 @@
                             tag_id[tag] = server_id;
                             console.log("current_id: ", tag_id);
                             update_plot_data(tag);
-                            //create_dummy_plot();
                         }
 
                     }).catch(function (err) {
