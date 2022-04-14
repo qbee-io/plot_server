@@ -5,7 +5,7 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name="plot_server",
+    name="http-plot-server",
     version="0.1",
     description="A simple and lightweight http server to visualize measurements",
     long_description=long_description,
@@ -35,7 +35,7 @@ setup(
     keywords="plot server, visualization, plotly, http, measurements",
     #package_dir={"": "plot_server"},
     #packages=find_packages(where="plot_server"),
-    project_data={
+    package_data={
         "plot_server": ["plotly/minimal.html"],
     },
     packages=["plot_server"],

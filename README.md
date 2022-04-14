@@ -8,7 +8,7 @@ Empty plot                 |  Selectable data
 ## Quickstart
 Install the package via pip
 ```
-pip3 install plot-server
+pip3 install http-plot-server
 ```
 
 Adapt the settings in param.cfg to your needs and run
