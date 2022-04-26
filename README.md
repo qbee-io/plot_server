@@ -1,6 +1,30 @@
 # plot_server
 A lightweight http plot server written in python to visualize data locally. Storing only a fixed number of data points (100 per default) per measurement to keep the resources low.
 
+<table>
+    <tr>
+        <td>Latest Release</td>
+        <td>
+            <a href="https://pypi.org/project/http-plot-server/"/>
+            <img src="https://badge.fury.io/py/http-plot-server.svg"/>
+        </td>
+    </tr>
+    <tr>
+        <td>PyPI Downloads</td>
+        <td>
+            <a href="https://pepy.tech/project/http-plot-server"/>
+            <img src="https://pepy.tech/badge/http-plot-server/month"/>
+        </td>
+    </tr>
+    <tr>
+        <td>License</td>
+        <td>
+            <a href="https://opensource.org/licenses/MIT"/>
+            <img src="https://img.shields.io/badge/License-MIT-yellow.svg"/>
+        </td>
+    </tr>
+</table>
+
 Empty plot                 |  Selectable data
 :-------------------------:|:-------------------------:
 ![](https://raw.githubusercontent.com/qbee-io/plot_server/main/img/empty_plot.png)  | ![](https://raw.githubusercontent.com/qbee-io/plot_server/main/img/two_plots.png)
